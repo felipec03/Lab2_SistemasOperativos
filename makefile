@@ -7,13 +7,13 @@ CC = gcc
 CFLAGS = -Wall -g
 
 # archivos base
-SRC = cut.c srep.c count.c archivos.c
+SRC = cut.c srep.c count.c archivos.c lab2.c
 
 # objetos
-OBJ = cut.o srep.o count.o archivos.o
+OBJ = cut.o srep.o count.o archivos.o lab2.o
 
 # archivos finales ejecutables por consola
-EXECUTABLES = cut srep count
+EXECUTABLES = cut srep count lab2
 
 # target por defecto
 all: $(EXECUTABLES)
@@ -26,6 +26,9 @@ srep: srep.o archivos.o
 	$(CC) -o $@ $^
 
 count: count.o archivos.o
+	$(CC) -o $@ $^
+
+lab2: lab2.o
 	$(CC) -o $@ $^
 
 # se compilan los objetos source a objetos
