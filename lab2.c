@@ -75,7 +75,7 @@ char** splitString(const char* input, int* num_tokens) {
 int main(int argc, char *argv[]){
 
     // El formato de comando de ejemplo debería ser
-    // $ ./lab2 ""./srep -i input.txt -s / -S \ | cut -d : -c 2,4"
+    // $ ./lab2 "./srep -i input.txt -s / -S \ | /cut -d : -c 2,4"
     // Se toma cómo argumento de argv[1] el comando completo y se hace un split para obtener los comandos
 
     if(argc!=2) {
@@ -88,9 +88,14 @@ int main(int argc, char *argv[]){
     int num_comandos;
     char** comandos = splitString(comando, &num_comandos);
 
+    // Se "limpian" las strings de después de los pipes que tiene un espacio extra.
+    for(int i = 1; i<num_comandos; i++){
+        comandos[i] = memmove(comandos[i], comandos[i]+1, strlen(comandos[i]));
+    }
+    
     printf("Comandos: \n");
     for(int i = 0; i<num_comandos; i++){
-        printf("Comando %d: %s\n", i, comandos[i]);
+        printf("%s\n", comandos[i]);
     }
 
     // La idea es ir por cada proceso en el arreglo de comandos y hacer un fork() y pipe() para conectarlos
@@ -103,7 +108,7 @@ int main(int argc, char *argv[]){
 
     for(int i = 0; i < num_comandos; i++){
         int fd[2];
-        if(pipe(fd) == -1){
+        if(pipe(fd) < 0){
             printf("Error al crear el pipe.\n");
             return 1;
         }
