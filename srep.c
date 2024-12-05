@@ -116,6 +116,7 @@ char *str_replace(char *stringOrigen, char *stringObjetivo, char *stringRemplazo
 // Función que reemplaza un string por otro en un archivo CSV y escribe el resultado en un nuevo archivo
 // Entrada: Puntero a la estructura CSVData, string objetivo, string nuevo, nombre del archivo de salida
 // Salida: Archivo de texto plano con el string objetivo reemplazado por el string nuevo
+/*
 void srep(CSVData *data, char *string_objetivo, char *string_nuevo, char* output_file) {
     // Abrir el archivo de salida en write mode "w"
     FILE *fp = fopen(output_file, "w");
@@ -147,64 +148,68 @@ void srep(CSVData *data, char *string_objetivo, char *string_nuevo, char* output
     // Cerrar el archivo
     fclose(fp);
 }
+*/
+
+void srep(CSVData *data, char *string_objetivo, char *string_nuevo, FILE *output) {
+    for (int i = 0; i < data->line_count; i++) {
+        char *replaced_line = str_replace(data->lines[i], string_objetivo, string_nuevo);
+        fprintf(output, "%s", replaced_line);
+        free(replaced_line);
+    }
+}
 
 int main(int argc, char *argv[]){
-	// Variable propia de getopt y unistd
     int opt;
-
-    // Variables para el nombre de los archivos y los strings
     char* archivoEntrada = NULL;
     char* archivoSalida = NULL;
     char* stringObjetivo = NULL;
     char* stringNuevo = NULL;
-    // Ciclo para leer las opciones de los flags
-    while((opt = getopt(argc, argv, "s:S:i:o:")) != -1){
+
+    while((opt = getopt(argc, argv, "i:o:s:S:")) != -1){
         switch(opt){
-        	// Opción para el string objetivo
-        	case 's':
+            case 'i':
+                archivoEntrada = optarg;
+                break;
+            case 'o':
+                archivoSalida = optarg;
+                break;
+            case 's':
                 stringObjetivo = optarg;
                 break;
-
-            // Opción para el string nuevo
             case 'S':
                 stringNuevo = optarg;
                 break;
-
-            // Opción  para archivo de entrada
-            case 'i':
-            	archivoEntrada = optarg;
-                break;
-
-            // Opción para archivo de salida
-            case 'o':
-				archivoSalida = optarg;
-				break;
-
-            // En cualquier otro caso, revisar casos borde:
-            case '?':
-                if(stringNuevo == NULL && optopt == 'S'){
-                    fprintf(stderr, "Falta el string nuevo\n");
-                    return 1;
-                }
-                else if(stringObjetivo == NULL && optopt == 's'){
-                    fprintf(stderr, "Falta el string objetivo\n");
-                    return 1;
-                }
-                else{
-                    fprintf(stderr, "Forma de comando: %s -i input -o output -s objetivo -S nuevo\n", argv[0]);
-                    exit(EXIT_FAILURE);
-                }
+            default:
+                abort();
         }
     }
-    
-    // Inicializamos la estructura CSVData
-    CSVData* inputData = malloc(sizeof(CSVData));
 
-    // Ahora, debemos leer el archivo de entrada tomando en consideración el input del getopt
-    read_csv(archivoEntrada, inputData);
+    if (!stringObjetivo || !stringNuevo){
+        fprintf(stderr, "Error: Missing strings for replacement\n");
+        return 1;
+    }
 
+    CSVData data;
+    if (archivoEntrada){
+        read_csv(archivoEntrada, &data);
+    } else {
+        read_csv_from_stream(stdin, &data);
+    }
 
-    // Llamamos a la función srep, que tiene por finalidad leer y escribir
-    srep(inputData, stringObjetivo, stringNuevo, archivoSalida);
+    FILE *output = stdout;
+    if (archivoSalida){
+        output = fopen(archivoSalida, "w");
+        if (!output){
+            perror("Error opening output file");
+            return 1;
+        }
+    }
 
+    srep(&data, stringObjetivo, stringNuevo, output);
+
+    if (archivoSalida){
+        fclose(output);
+    }
+
+    return 0;
 }

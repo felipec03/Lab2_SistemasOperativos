@@ -22,61 +22,68 @@ int contar_caracteres(CSVData *data){
 
 int main(int argc, char *argv[])
 {
-	// Variable propia de getopt y unistd
     int opt;
-
-    // Variables para las opciones de flags
     int opcionC = 0;
     int opcionL = 0;
-    // Variable para el nombre del archivo
-    char* archivo = NULL;
+    char* archivoEntrada = NULL;
+    char* archivoSalida = NULL;
 
-    // Ciclo para leer las opciones de los flags
-    while((opt = getopt(argc, argv, "CLi:")) != -1)
+    while((opt = getopt(argc, argv, "CLi:o:")) != -1)
     {
         switch(opt)
         {
-        	// Opcion para el nombre del archivo
-        	case 'i':
-                archivo = optarg;
+            case 'i':
+                archivoEntrada = optarg;
                 break;
-
-            // Opcion para contar el numero de caracteres
+            case 'o':
+                archivoSalida = optarg;
+                break;
             case 'C':
                 opcionC = 1;
                 break;
-
-            // Opcion para contar el numero de lineas
             case 'L':
-            	opcionL = 1;
+                opcionL = 1;
                 break;
-
-            // En cualquier otro caso, abortar
             default:
-	            abort();
+                abort();
         }
     }
 
-    // Leer el archivo CSV y almacenar las líneas en la estructura `data`
     CSVData data;
-    read_csv(archivo, &data);
+    if (archivoEntrada)
+    {
+        read_csv(archivoEntrada, &data);
+    }
+    else
+    {
+        read_csv_from_stream(stdin, &data);
+    }
 
-    // Sacando el número de líneas y caracteres por medio de la estructura
-    // Además de contar caracteres declarado al comienzo del programa
     int lineas = data.line_count;
     int caracteres = contar_caracteres(&data);
 
-    // Opciones de impresión por flags
-    if((opcionC == 1) && (opcionL == 0)){
-    	printf("%d\n", caracteres);
+    FILE *output = stdout;
+    if (archivoSalida)
+    {
+        output = fopen(archivoSalida, "w");
+        if (!output)
+        {
+            perror("Error opening output file");
+            return 1;
+        }
     }
 
-    if ((opcionL == 1) && (opcionC == 0)){
-		printf("%d\n", lineas);
-	}
+    if(opcionC && !opcionL){
+        fprintf(output, "%d\n", caracteres);
+    } else if(opcionL && !opcionC){
+        fprintf(output, "%d\n", lineas);
+    } else if(opcionL && opcionC){
+        fprintf(output, "%d %d\n", lineas, caracteres);
+    }
 
-    if((opcionL == 1) && (opcionC == 1)){
-    	printf("%d %d\n", lineas, caracteres);
+    if (archivoSalida)
+    {
+        fclose(output);
     }
 
     return 0;

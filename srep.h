@@ -10,7 +10,9 @@
 
 // Declaración de la función que reemplazará todas las iteraciones de un string objetivo
 // a un archivo de texto 
-void srep(CSVData *data, char *string_objetivo, char *string_nuevo, char* output_file);
+//void srep(CSVData *data, char *string_objetivo, char *string_nuevo, char* output_file);
+
+void srep(CSVData *data, char *string_objetivo, char *string_nuevo, FILE *output);
 
 // Declaración de reimplementacion de strncpy 
 char *my_strncpy(char *dest, const char *src, int n);

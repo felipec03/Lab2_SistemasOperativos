@@ -1,3 +1,5 @@
+#define MAX_ARGS 20
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -70,6 +72,14 @@ char** splitString(const char* input, int* num_tokens) {
     return tokens;
 }
 
+void parseCommand(char* cmd, char** args) {
+    int i = 0;
+    args[i] = strtok(cmd, " ");
+    while(args[i] != NULL) {
+        i++;
+        args[i] = strtok(NULL, " ");
+    }
+}
 
 // Conectar las 3 operaciones por medio de fork() y pipe() de m
 int main(int argc, char *argv[]){
@@ -106,19 +116,55 @@ int main(int argc, char *argv[]){
     // - Conectar los pipes
     // - Esperar a que el proceso termine
 
-    for(int i = 0; i < num_comandos; i++){
-        int fd[2];
-        if(pipe(fd) < 0){
-            printf("Error al crear el pipe.\n");
-            return 1;
-        }
+    int num_pipes = num_comandos - 1;
+    int fd[2 * num_pipes]; // File descriptors for pipes
 
-        int pidProceso = fork();
-        if(pidProceso < 0){
-            printf("Error al crear el proceso para el comando.\n");
-            return 1;
+    // Create all necessary pipes
+    for(int i = 0; i < num_pipes; i++) {
+        if(pipe(fd + i*2) < 0) {
+            perror("Failed to create pipe");
+            exit(1);
         }
     }
 
-    //free(comando);
+    // Loop through commands and fork processes
+    for(int i = 0; i < num_comandos; i++) {
+        pid_t pid = fork();
+
+        // Proceso hijo
+        if(pid == 0) {
+
+            // Redirect input if not first command
+            if(i != 0) {
+                dup2(fd[(i-1)*2], 0);
+            }
+
+            // Redirect output if not last command
+            if(i != num_comandos - 1) {
+                dup2(fd[i*2 + 1], 1);
+            }
+
+            // Close all pipe file descriptors in child
+            for(int j = 0; j < 2 * num_pipes; j++) {
+                close(fd[j]);
+            }
+
+            // Parse command and execute
+            char *args[MAX_ARGS];
+            parseCommand(comandos[i], args);
+            execvp(args[0], args);
+            perror("execvp failed");
+            exit(1);
+        }
+    }
+
+    // Parent process closes all pipes
+    for(int i = 0; i < 2 * num_pipes; i++) {
+        close(fd[i]);
+    }
+
+    // Parent waits for all children
+    for(int i = 0; i < num_comandos; i++) {
+        wait(NULL);
+    }
 }

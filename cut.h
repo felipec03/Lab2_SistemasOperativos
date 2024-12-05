@@ -25,6 +25,5 @@ void split(CSVData *data, const char delimiter, CSVColumns *columns_data);
 char ***cut(CSVColumns *columns_data, int *cobj, int num_cobj);
 
 // Declaración de la función que escribirá la salida en un archivo
-void out(char ***cut_data, int num_lines, int num_cols, const char *filename, char delimiter);
-
+void out(char ***cut_data, int num_lines, int num_cols, FILE *output, char delimiter);
 #endif

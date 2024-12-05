@@ -111,6 +111,7 @@ char ***cut(CSVColumns *columns_data, int *cobj, int num_cobj) {
 // Función para escribir el resultado de cut en un archivo CSV
 // Entrada: cut_data: datos cortados, num_lines: número de líneas, num_cols: número de columnas, filename: nombre del archivo, delimiter: delimitador
 // Salida: void, procesa un archivo de texto con los datos cortados
+/*
 void out(char ***cut_data, int num_lines, int num_cols, const char *filename, char delimiter) {
     // Abrimos el archivo en modo de agregar
     FILE *file = fopen(filename, "a");
@@ -142,6 +143,19 @@ void out(char ***cut_data, int num_lines, int num_cols, const char *filename, ch
     // Cerrar el archivo
     fclose(file);
 }
+*/
+
+void out(char ***cut_data, int num_lines, int num_cols, FILE *output, char delimiter) {
+    for (int i = 0; i < num_lines; i++) {
+        for (int j = 0; j < num_cols; j++) {
+            fprintf(output, "%s", cut_data[i][j]);
+            if (j < num_cols - 1) {
+                fprintf(output, "%c", delimiter);
+            }
+        }
+        fprintf(output, "\n");
+    }
+}
 
 // funcion para copiar un archivo a otro
 // Entrada: file1: archivo de entrada en modo lectura, file2: archivo de salida en modo escritura
@@ -156,107 +170,69 @@ void copyarch(FILE *file1, FILE *file2) {
 }
 
 int main(int argc, char *argv[]) {
-    CSVData data;
-    CSVColumns columns_data;
-
-    // Variable propia de getopt y unistd
     int opt;
-
-    // Variables para el nombre de los archivos y los strings
     char* archivoEntrada = NULL;
     char* archivoSalida = NULL;
     char* delimitador = NULL;
     char* stringColumnas = NULL;
-    int flagColumns = 1;
-    // Ciclo para leer las opciones de los flags
-    while((opt = getopt(argc, argv, "d:c:i:o:")) != -1)
-    {
-        switch(opt) {
-	       	// Opción para el string objetivo
-	       	case 'd':
-	            delimitador = optarg;
-	            break;
 
-	            // Opción para el string nuevo
-	        case 'c':
-	            // Si no se proporciona argumento para -c, optarg será NULL
+    while((opt = getopt(argc, argv, "d:c:i:o:")) != -1){
+        switch(opt){
+            case 'i':
+                archivoEntrada = optarg;
+                break;
+            case 'o':
+                archivoSalida = optarg;
+                break;
+            case 'd':
+                delimitador = optarg;
+                break;
+            case 'c':
                 stringColumnas = optarg;
                 break;
-
-	            // Opción  para archivo de entrada
-	        case 'i':
-	           	archivoEntrada = optarg;
-	            break;
-
-	            // Opción para archivo de salida
-	        case 'o':
-				archivoSalida = optarg;
-				break;
-
-            // En cualquier otro caso, alertar al usuario
-            case '?':
-                if(optopt == 'c' && stringColumnas == NULL){
-                    flagColumns = 0;
-                    break;
-                }
-                else{
-                    fprintf(stderr, "Forma de comando: %s -i input -o output -d delimitador -c columnas separadas por coma\n", argv[0]);
-                    break;
-                }
+            default:
+                abort();
         }
     }
 
-    // CASO BORDE:
-    // Abrir los archivos para copiar en caso de que no se especifiquen columnas
-    FILE *inputFile = fopen(archivoEntrada, "r");
-    FILE *outputFile = fopen(archivoSalida, "a");
-    if (flagColumns == 0) {
-        // Llamar a la función copyarch para copiar el contenido
-        copyarch(inputFile, outputFile);
-
-        // Cerrar los archivos
-        fclose(inputFile);
-        fclose(outputFile);
+    if (!stringColumnas){
+        fprintf(stderr, "Error: Columns not specified\n");
         return 1;
     }
-    else{
 
-    // Typecasting del delimitador y de las columnas para procesamiento adecuado
-    const char delimitadorChar = delimitador[0];
-
-    // Convertir el string de columnas a un arreglo de enteros
-    int numStringColumnas = my_strlen(stringColumnas);
-    int arrayColumnas[numStringColumnas];
-    int numColumnas = 0;
-    // Sale de archivo.c
-    transform_string_to_array(stringColumnas, arrayColumnas, &numColumnas);
-
-    // Leer el archivo CSV original
-    read_csv(archivoEntrada, &data);
-
-    // Separar las lineas del CSV utilizando el delimitador de getopt
-    // Queda guardado en parametro columns_data
-    split(&data, delimitadorChar, &columns_data);
-
-    if(minValue(arrayColumnas, numColumnas) < 1){
-        printf("Error: Columnas deben ser mayores a 0\n");
-        return 1;
+    CSVData data;
+    if (archivoEntrada){
+        read_csv(archivoEntrada, &data);
+    } else {
+        read_csv_from_stream(stdin, &data);
     }
-    
-    // Aplicar la funcion cut para extraer las columnas objetivo
-    char ***resultado_cut = cut(&columns_data, arrayColumnas, numColumnas);
 
-    out(resultado_cut, columns_data.line_count, numColumnas, archivoSalida, delimitadorChar);
+    char delimiter = (delimitador && delimitador[0]) ? delimitador[0] : ',';
 
-    // Liberar memoria, buena practica =)
-    for (int i = 0; i < columns_data.line_count; i++) {
-        for (int j = 0; j < numColumnas; j++) {
-            free(resultado_cut[i][j]);
+    CSVColumns columns_data;
+    split(&data, delimiter, &columns_data);
+
+    int columnasObjetivo[100];
+    int num_cobj = 0;
+    transform_string_to_array(stringColumnas, columnasObjetivo, &num_cobj);
+    int *columnasInvertidas = reverse_array(columnasObjetivo, num_cobj);
+
+    char ***cut_data = cut(&columns_data, columnasInvertidas, num_cobj);
+
+    FILE *output = stdout;
+    if (archivoSalida){
+        output = fopen(archivoSalida, "w");
+        if (!output){
+            perror("Error opening output file");
+            return 1;
         }
-        free(resultado_cut[i]);
     }
-    free(resultado_cut);
+
+    out(cut_data, columns_data.line_count, num_cobj, output, delimiter);
+
+    if (archivoSalida){
+        fclose(output);
+    }
 
     return 0;
-    }
 }

@@ -109,6 +109,16 @@ void read_csv(const char *filename, CSVData *data) {
     fclose(file);
 }
 
+void read_csv_from_stream(FILE *stream, CSVData *data) {
+    data->line_count = 0;
+    char line[MAX_LINE_LENGTH];
+
+    while (fgets(line, sizeof(line), stream)) {
+        strcpy(data->lines[data->line_count], line);
+        data->line_count++;
+    }
+}
+
 // Función que muestra las líneas almacenadas del archivo
 // Netamente para revisar si es que se leyo correctamente
 // Entrada: estructura con los datos
