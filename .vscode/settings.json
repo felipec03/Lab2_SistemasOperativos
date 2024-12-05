@@ -4,6 +4,7 @@
         "string.h": "c",
         "stdio.h": "c",
         "archivos.h": "c",
-        "cut.h": "c"
+        "cut.h": "c",
+        "unistd.h": "c"
     }
 }
