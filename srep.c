@@ -153,7 +153,7 @@ void srep(CSVData *data, char *string_objetivo, char *string_nuevo, char* output
 void srep(CSVData *data, char *string_objetivo, char *string_nuevo, FILE *output) {
     for (int i = 0; i < data->line_count; i++) {
         char *replaced_line = str_replace(data->lines[i], string_objetivo, string_nuevo);
-        fprintf(output, "%s", replaced_line);
+        fprintf(output, "%s\n", replaced_line); // Agregar salto de línea explícito
         free(replaced_line);
     }
 }

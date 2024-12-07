@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
     if (argc != 2 || strlen(argv[1]) == 0) {
     fprintf(stderr, "Error: Entrada vacía o mal formada.\n");
     exit(1);
-}
+    }
 
     const char* command = argv[1];
     int num_commands;
