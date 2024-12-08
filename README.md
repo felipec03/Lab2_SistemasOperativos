@@ -1,6 +1,7 @@
-# Laboratorio 1 - Sistemas Operativos Universidad de Santiago de Chile
+# Laboratorio 2 - Sistemas Operativos Universidad de Santiago de Chile
 ***
 > En este laboratorio se verá una implementación rudimentaria de **pipelining** en el lenguaje C orientado a librerías UNIX usando procesos, pipes y otras funcionas propias de `<unistd.h>`.
+> El propósito de esta experiencia es de entender cómo la consola (bash) utiliza el concepto de procesos y lo aplica a algo de suma utilidad cómo lo es la concatenación de operaciones por consola.
 
 # Ejecución del laboratorio
 Cómo fue estipulado en clases, para poder probar los comandos es necesario el uso de `makefile`, por lo que el comando para la generación de los archivos ejecutables es:
