@@ -2,6 +2,9 @@
 
 // Funciones de string artesanal
 
+// Función que encuentra el valor mínimo en un arreglo de enteros
+// Entrada: arreglo de enteros y tamaño del arreglo
+// Salida: entero con el valor mínimo
 int minValue(int myArray[], size_t size) {
     /* enforce the contract */
     assert(myArray && size);
@@ -77,7 +80,7 @@ int my_strlen(const char *str) {
     return len;
 }
 
-
+// ----------------------------
 // Funciones de CSV
 // ----------------------------
 
@@ -109,10 +112,14 @@ void read_csv(const char *filename, CSVData *data) {
     fclose(file);
 }
 
+// Función especializada para leer un archivo CSV desde un stream
+// Entrada: puntero a un stream y estructura donde se almacenarán los datos
+// Salida: void, hace un proceso.
 void read_csv_from_stream(FILE *stream, CSVData *data) {
     data->line_count = 0;
     char line[MAX_LINE_LENGTH];
 
+    // Leer cada línea del stream
     while (fgets(line, sizeof(line), stream)) {
         strcpy(data->lines[data->line_count], line);
         data->line_count++;
@@ -129,6 +136,9 @@ void print_csv(const CSVData *data) {
     }
 }
 
+// Función para invertir un arreglo de enteros
+// Entrada: arreglo de enteros y tamaño del arreglo
+// Salida: arreglo de enteros invertido
 int* reverse_array(int* array, int size){
 	int* reversed_array = (int*)malloc(size * sizeof(int));
 	for (int i = 0; i < size; i++){

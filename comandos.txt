@@ -1,4 +1,4 @@
-./lab2 "./srep -i input.txt -s x -S y | ./cut -d : -c 2,3 | ./count -C" #esta wea genera la salida mal ns pork
+./lab2 "./srep -i input.txt -s x -S y | ./cut -d : -c 2,3 | ./count -C" 
 ./lab2 "./cut -i input.txt -d : -c 2,3 | ./srep -s x -S y"
 ./lab2 "./srep -i input.txt -s x -S y | ./srep -s a -S b | ./srep -s c -S d"
 ./lab2 "./srep -i input.txt -s x -S y | srep -s a -S b | srep -s c -S d"

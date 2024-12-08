@@ -111,40 +111,6 @@ char ***cut(CSVColumns *columns_data, int *cobj, int num_cobj) {
 // Función para escribir el resultado de cut en un archivo CSV
 // Entrada: cut_data: datos cortados, num_lines: número de líneas, num_cols: número de columnas, filename: nombre del archivo, delimiter: delimitador
 // Salida: void, procesa un archivo de texto con los datos cortados
-/*
-void out(char ***cut_data, int num_lines, int num_cols, const char *filename, char delimiter) {
-    // Abrimos el archivo en modo de agregar
-    FILE *file = fopen(filename, "a");
-    if (file == NULL) {
-        printf("No se pudo abrir el archivo %s\n", filename);
-        return;
-    }
-
-    // Iteramos sobre las líneas
-    for (int i = 0; i < num_lines; i++) {
-        for (int j = 0; j < num_cols; j++) {
-            // Si la celda está vacía, escribir una celda vacía
-            if (cut_data[i][j] == NULL || cut_data[i][j][0] == '\0') {
-                fprintf(file, " ");
-            } else {
-                // Escribir el contenido de la celda
-                fprintf(file, "%s", cut_data[i][j]);
-            }
-
-            // Agregar el delimitador después de cada columna, excepto la última
-            if (j < num_cols - 1) {
-                fprintf(file, "%c", delimiter);
-            }
-        }
-        // Escribir una nueva línea al final de cada línea
-        fprintf(file, "\n");
-    }
-
-    // Cerrar el archivo
-    fclose(file);
-}
-*/
-
 void out(char ***cut_data, int num_lines, int num_cols, FILE *output, char delimiter) {
     for (int i = 0; i < num_lines; i++) {
         for (int j = 0; j < num_cols; j++) {
@@ -169,6 +135,7 @@ void copyarch(FILE *file1, FILE *file2) {
     }
 }
 
+// Ejecucion principal del programa
 int main(int argc, char *argv[]) {
     int opt;
     char* archivoEntrada = NULL;

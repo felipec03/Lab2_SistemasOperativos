@@ -1,6 +1,4 @@
 #include "srep.h"
-#include "archivos.h"
-#include <string.h>
 
 // Funcion artesanal de strstr() encuentra la primera ocurrencia de la subcadena, "aguja en un pajar"
 // Entrada: dos cadenas de caracteres
@@ -58,6 +56,8 @@ char *my_strncpy(char *dest, const char *src, int n) {
 }
 
 // Función str_replace modificada usando funciones personalizadas de cadenas
+// Entrada: tres cadenas de caracteres
+// Salida: puntero a caracter de la cadena resultante
 char *str_replace(char *stringOrigen, char *stringObjetivo, char *stringRemplazo) {
     // Cadena resultante
     char *resultado;  
@@ -116,50 +116,6 @@ char *str_replace(char *stringOrigen, char *stringObjetivo, char *stringRemplazo
 // Función que reemplaza un string por otro en un archivo CSV y escribe el resultado en un nuevo archivo
 // Entrada: Puntero a la estructura CSVData, string objetivo, string nuevo, nombre del archivo de salida
 // Salida: Archivo de texto plano con el string objetivo reemplazado por el string nuevo
-/*
-void srep(CSVData *data, char *string_objetivo, char *string_nuevo, char* output_file) {
-    // Abrir el archivo de salida en write mode "w"
-    FILE *fp = fopen(output_file, "w");
-    // Manejo de error
-    if (fp == NULL) {
-        printf("Error al abrir el archivo de salida, inténtelo de nuevo...\n");
-        return;
-    }
-
-    // Iteramos sobre lineas de la estructura archivo
-    for (int i = 0; i < data->line_count; i++) {
-    	// Variables auxiliares
-        char* aux = data->lines[i];
-        char* resultLine = str_replace(aux, string_objetivo, string_nuevo);
-
-        // Si linea no esta vacia...
-        if (resultLine != NULL) {
-            // Escribir la línea modificada en el archivo
-            fprintf(fp, "%s\n", resultLine);
-
-            // Liberar la memoria asignada por str_replace
-            free(resultLine);
-        } else {
-            // Si str_replace falla, escribir la línea original
-            fprintf(fp, "%s\n", aux);
-        }
-    }
-
-    // Cerrar el archivo
-    fclose(fp);
-}
-*/
-
-/*
-void srep(CSVData *data, char *string_objetivo, char *string_nuevo, FILE *output) {
-    for (int i = 0; i < data->line_count; i++) {
-        char *replaced_line = str_replace(data->lines[i], string_objetivo, string_nuevo);
-        fprintf(output, "%s\n", replaced_line); // Agregar salto de línea explícito
-        free(replaced_line);
-    }
-}
-*/
-
 void srep(CSVData *data, char *string_objetivo, char *string_nuevo, FILE *output) {
     for (int i = 0; i < data->line_count; i++) {
         char *line = data->lines[i];
@@ -181,7 +137,7 @@ void srep(CSVData *data, char *string_objetivo, char *string_nuevo, FILE *output
     }
 }
 
-
+// Ejecución del programa
 int main(int argc, char *argv[]){
     int opt;
     char* archivoEntrada = NULL;
