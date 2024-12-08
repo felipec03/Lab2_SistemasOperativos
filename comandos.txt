@@ -1,5 +1,6 @@
 ./lab2 "./srep -i input.txt -s x -S y | ./cut -d : -c 2,3 | ./count -C" #esta wea genera la salida mal ns pork
 ./lab2 "./cut -i input.txt -d : -c 2,3 | ./srep -s x -S y"
 ./lab2 "./srep -i input.txt -s x -S y | ./srep -s a -S b | ./srep -s c -S d"
+./lab2 "./srep -i input.txt -s x -S y | srep -s a -S b | srep -s c -S d"
 ./lab2 "./srep -i input.txt -s x -S y | ./srep -s a -S b | ./srep -s c -S d | ./srep -o outputMalevolo.txt -s y -S x"
 ./lab2 "./srep -i input.txt -s x -S y | ./srep -s a -S b | ./srep -s c -S d | ./srep -s e -S f | ./srep -s g -S h | ./srep -s i -S j | ./srep -s k -S l | ./srep -s m -S n | ./srep -s o -S p | ./srep -s q -S r | ./srep -o output.txt -s t -S u"

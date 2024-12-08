@@ -1,7 +1,6 @@
 # Laboratorio 1 - Sistemas Operativos Universidad de Santiago de Chile
 ***
-> En este laboratorio se verá cómo se utiliza la función ```getopt()```.
-> Además, es de importancia notar que no se utilizará la librería ```<string.h>```
+> En este laboratorio se verá una implementación rudimentaria de **pipelining** en el lenguaje C orientado a librerías UNIX usando procesos, pipes y otras funcionas propias de `<unistd.h>`.
 
 # Ejecución del laboratorio
 Cómo fue estipulado en clases, para poder probar los comandos es necesario el uso de `makefile`, por lo que el comando para la generación de los archivos ejecutables es:
@@ -13,9 +12,31 @@ Para limpiar los archivos residuales post ejecución de los archivos, se utiliza
 ```
 make clean
 ```
+## Consideraciones de Ejecución
+> Cómo se mencionó mas adelante, para la correcta ejecución **es necesario el uso de comillas seguido del comando** `./lab2`, por ejemplo:
+
+
+**Comandos válidos**
+- `./lab2 "./srep -i input.txt -s x -S y | ./srep -s a -S b | ./srep -s c -S d"`
+- `./lab2 "./srep -i input.txt -s x -S y | ./srep -s a -S b | ./srep -s c -S d | ./srep -o outputMalevolo.txt -s y -S x"`
+
+**Comandos inválidos**
+- `./lab2 ./srep -i input.txt -s x -S y | ./srep -s a -S b | ./srep -s c -S d`
+- `./lab2 ./srep -i input.txt -s x -S y | ./srep -s a -S b | ./srep -s c -S d | ./srep -o outputMalevolo.txt -s y -S x`
 
 # Especificación de Archivos
+> Para esta sección, se reutilizó makefile de laboratorio anterior, lo único que difiere es el ejecutable `./lab2`.
 
+## ```lab2.c```
+> Este archivo cumple la función de simular el pipelining en una terminal (bash) de un sistema basado en UNIX, este sigue la siguiente secuencia de pasos:
+
+- Tomar por consola el string por medio de `argv[0]`, **esto implica que para el funcionamiento correcto del laboratorio todo lo seguido después de la invocación de `./lab2` debe ser escrito entre comillas.** Luego esta es parseada por `'|'` y guardada en un arreglo de punteros a caracter llamada `comandos`.
+
+- Se itera por sobre el arreglo de comandos, creando un pipe para cada dupla de comandos, osease $comandos -1$ pipes, mientras que se deben almacenar los $2 \times comandos$ descriptores en el respectivo arreglo `fd[]`
+
+- Finalmente, por medio de `fork()` cada proceso hijo le corresponde un comando, donde este por medio de `dup2()` se lee el comando y finalmente es ejecutado el proceso invocado por medio de `execvp()`, considerando además el caso donde no se encuentre el PATH, por eso se recurre en las últimas líneas al comando `setenv()` (https://www.ibm.com/docs/en/zos/2.4.0?topic=functions-setenv-add-delete-change-environment-variables)
+
+- Por último y no menos importante, para el correcto manejo de procesos se cierran los pipes y procesos por medio de `close()` y `wait()`. 
 
 ## ```archivos.c```
 > Este archivo contiene varias implentaciones de funciones típicas de la biblioteca ```<string.h>``` y otras funciones de utilida general. Ejemplos cómo el string copy, string length, string concatenation, transformacion de string a arreglo, entre otros. 

@@ -52,6 +52,8 @@ char** splitString(const char* input, int* num_tokens) {
 }
 
 // Función para dividir los comandos en sus argumentos
+// Entrada: cmd: comando a dividir, args: arreglo de argumentos
+// Salida: void, modifica el arreglo de argumentos
 void parseCommand(char* cmd, char** args) {
     int i = 0;
     args[i] = strtok(cmd, " ");
@@ -75,29 +77,25 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Error: La cadena de comandos no se pudo dividir correctamente.\n");
         exit(1);
     }
-
-    // Mostrar los comandos a ejecutar
-    printf("Comandos a ejecutar:\n");
-    for (int i = 0; i < num_commands; i++) {
-        printf("Comando %d: %s\n", i + 1, commands[i]);
-    }
-
-
-    int num_pipes = num_commands - 1; // Número de pipes necesarios los cuales son igual al número de comandos menos 1
-    int fd[2 * num_pipes]; // File descriptors usados para los pipes
+    // #pipes = #comandos - 1, se trabajan de a pares cómo en diagrama del enunciado
+    int num_pipes = num_commands - 1; 
+    // Cantidad de descriptores de archivos respectivos a los pipes
+    int fd[2 * num_pipes]; 
 
     // Crear pipes
     for (int i = 0; i < num_pipes; i++) {
+        // En caso de error al crear el pipe
         if (pipe(fd + i * 2) < 0) {
             perror("Error: No se pudo crear el pipe");
             exit(1);
         }
     }
 
+    // Se va a ejecutar un comando por cada iteración
     for (int i = 0; i < num_commands; i++) {
-        pid_t pid = fork(); // Crear un proceso hijo
-        if (pid == 0) {
-            
+        // Crea un proceso hijo <=> comando a ejecutar
+        pid_t pid = fork(); 
+        if (pid == 0) { // ¿Estamos en proceso hijo?
             // Redirigir la entrada si no es el primer comando
             if (i != 0) {
                 dup2(fd[(i - 1) * 2], 0); // Leer del pipe anterior
@@ -115,11 +113,31 @@ int main(int argc, char *argv[]) {
             // Parsear el comando y ejecutar
             char* args[MAX_ARGS]; // Argumentos del comando
             parseCommand(commands[i], args); // Parsear el comando
-            // Verificar si el comando es válido y ejecutarlo
-            if (execvp(args[0], args) == -1) {
-                perror("Error en execvp");
+
+
+            // Este trozo de código en general es para ejecutar los comandos sin necesidas del "./"
+            char *path = getenv("PATH");
+
+            // "String" donde se guarda el directorio del comando
+            char new_path[1024];
+
+            // Parte de stdio
+            // Se usa para concatenar el directorio del comando con el directorio actual
+            snprintf(new_path, sizeof(new_path), "%s:%s", path, ".");
+
+            // Parte de la librería para UNIX
+            // Se usa para cambiar el directorio del comando
+            setenv("PATH", new_path, 1);
+
+            // Ahora se ejecuta el comando de todas formas
+            // En caso de error, se imprime un mensaje
+            if(execvp(args[0], args) < 0) {
+                perror("Error: No se pudo ejecutar el comando");
                 exit(1);
             }
+
+            perror("Error con execvp...");
+            exit(1);
         }
     }
 

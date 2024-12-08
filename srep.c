@@ -150,6 +150,7 @@ void srep(CSVData *data, char *string_objetivo, char *string_nuevo, char* output
 }
 */
 
+/*
 void srep(CSVData *data, char *string_objetivo, char *string_nuevo, FILE *output) {
     for (int i = 0; i < data->line_count; i++) {
         char *replaced_line = str_replace(data->lines[i], string_objetivo, string_nuevo);
@@ -157,6 +158,29 @@ void srep(CSVData *data, char *string_objetivo, char *string_nuevo, FILE *output
         free(replaced_line);
     }
 }
+*/
+
+void srep(CSVData *data, char *string_objetivo, char *string_nuevo, FILE *output) {
+    for (int i = 0; i < data->line_count; i++) {
+        char *line = data->lines[i];
+        size_t len = strlen(line);
+
+        // Remove any trailing newline character
+        if (len > 0 && line[len - 1] == '\n') {
+            line[len - 1] = '\0';
+        }
+
+        // Perform the string replacement
+        char *replaced_line = str_replace(line, string_objetivo, string_nuevo);
+
+        // Print the replaced line with a single newline
+        fprintf(output, "%s\n", replaced_line);
+
+        // Free allocated memory
+        free(replaced_line);
+    }
+}
+
 
 int main(int argc, char *argv[]){
     int opt;
